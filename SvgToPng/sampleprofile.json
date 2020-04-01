@@ -1,0 +1,91 @@
+[
+  {
+    "ColorConversions": [
+      {
+        "XPath": "svg/path[2]",
+        "Color": "#212121"
+      }
+    ],
+    "Output": [
+      {
+        "Path": "android/drawable-hdpi/{name}.png",
+        "Width": 24,
+        "Height": 24
+      },
+      {
+        "Path": "android/drawable-xhdpi/{name}.png",
+        "Width": 32,
+        "Height": 32
+      },
+      {
+        "Path": "android/drawable-xxhdpi/{name}.png",
+        "Width": 48,
+        "Height": 48
+      },
+      {
+        "Path": "android/drawable-xxxhdpi/{name}.png",
+        "Width": 60,
+        "Height": 60
+      },
+      {
+        "Path": "ios/Assets.x.cassets/{name}.imageset/{name}.png",
+        "Width": 16,
+        "Height": 16
+      },
+      {
+        "Path": "ios/Assets.x.cassets/{name}.imageset/{name}@2.png",
+        "Width": 32,
+        "Height": 32
+      },
+      {
+        "Path": "ios/Assets.x.cassets/{name}.imageset/{name}@3.png",
+        "Width": 48,
+        "Height": 48
+      },
+      {
+        "Path": "android/drawable-night-hdpi/{name}-dark.png",
+        "Width": 24,
+        "Height": 24,
+        "ColorConversions": [
+          {
+            "XPath": "svg/path[2]",
+            "Color": "#FFF"
+          }
+        ]
+      },
+      {
+        "Path": "android/drawable-night-xhdpi/{name}.png",
+        "Width": 32,
+        "Height": 32,
+        "ColorConversions": [
+          {
+            "XPath": "svg/path[2]",
+            "Color": "#FFF"
+          }
+        ]
+      },
+      {
+        "Path": "android/drawable-night-xxhdpi/{name}.png",
+        "Width": 48,
+        "Height": 48,
+        "ColorConversions": [
+          {
+            "XPath": "svg/path[2]",
+            "Color": "#FFF"
+          }
+        ]
+      },
+      {
+        "Path": "android/drawable-night-xxxhdpi/{name}.png",
+        "Width": 60,
+        "Height": 60,
+        "ColorConversions": [
+          {
+            "XPath": "svg/path[2]",
+            "Color": "#FFF"
+          }
+        ]
+      }
+    ]
+  }
+]

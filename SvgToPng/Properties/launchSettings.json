@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SvgToPng": {
+      "commandName": "Project",
+      "commandLineArgs": "-f \"C:/Users/Strit/Downloads/\" -c sampleprofile.json -o \"C:/Users/Strit/Downloads/SvgToPngTest/\""
+    }
+  }
+}
