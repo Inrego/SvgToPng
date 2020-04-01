@@ -32,5 +32,5 @@ Convert all .svg files found in `C:/InputFiles/` and save all output files in `C
 ```
 Convert `C:/InputFiles/icon.svg` and save all output files in `C:/OutputFiles/`
 ```
-./SvgToPng -f C:/InputFiles/ -c C:/InputFiles/sampleprofile.json -o C:/OutputFiles/
+./SvgToPng -f C:/InputFiles/icon.svg -c C:/InputFiles/sampleprofile.json -o C:/OutputFiles/
 ```
