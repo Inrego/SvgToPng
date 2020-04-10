@@ -18,12 +18,16 @@ Usage:
   SvgToPng [options]
 
 Options:
-  -f, --inputFile <inputfile> (REQUIRED)            The relative or absolute path to the input file or directory.
-  -o, --outputDir <outputdir> (REQUIRED)            The relative or absolute path to the output files.
+  -f, --inputFile <inputfile>                       The relative or absolute path to the input file or directory.
+  -o, --outputDir <outputdir>                       The relative or absolute path to the output files.
   -c, --profileConfig <profileconfig> (REQUIRED)    The relative or absolute path to the profile config file.
   --version                                         Show version information
   -?, -h, --help                                    Show help and usage information
 ```
+
+If `OutputDirectory` is specified in the config file, it will overwrite the program parameter.
+
+If `Input` is specified in the config file, it will process those as well as the input parameter sent to the program.
 
 ### Example
 Convert all .svg files found in `C:/InputFiles/` and save all output files in `C:/OutputFiles/`

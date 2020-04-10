@@ -14,7 +14,6 @@ namespace SvgToPng
 {
     class Program
     {
-        private static Params _params;
         static async Task Main(string[] args)
         {
             var rootCommand = new RootCommand()
@@ -23,12 +22,10 @@ namespace SvgToPng
             };
             rootCommand.AddOption(new Option(new[] { "--inputFile", "-f" }, "The relative or absolute path to the input file or directory.")
             {
-                Required = true,
                 Argument = new Argument<string>()
             });
             rootCommand.AddOption(new Option(new[] { "--outputDir", "-o" }, "The relative or absolute path to the output files.")
             {
-                Required = true,
                 Argument = new Argument<DirectoryInfo>(),
                 Name = "OutputDirectory"
             });
@@ -40,28 +37,6 @@ namespace SvgToPng
 
             rootCommand.Handler = CommandHandler.Create(async (Params parameters) =>
             {
-                _params = parameters;
-                DirectoryInfo inputDir = null;
-                FileInfo inputFile = null;
-                if (Directory.Exists(parameters.InputFile))
-                {
-                    inputDir = new DirectoryInfo(parameters.InputFile);
-                }
-                else if (File.Exists(parameters.InputFile))
-                {
-                    inputFile = new FileInfo(parameters.InputFile);
-                }
-                else
-                {
-                    Console.WriteLine("[ERROR]: Input path not found: {0}", parameters.InputFile);
-                    return;
-                }
-
-                if (!parameters.OutputDirectory.Exists)
-                {
-                    Console.WriteLine("[ERROR]: Output directory not found: {0}", parameters.OutputDirectory);
-                    return;
-                }
                 if (!parameters.ProfileConfig.Exists)
                 {
                     Console.WriteLine("[ERROR]: Profile config file not found: {0}", parameters.ProfileConfig);
@@ -73,7 +48,7 @@ namespace SvgToPng
                 {
                     using (var fs = parameters.ProfileConfig.OpenRead())
                     {
-                        profiles = await JsonSerializer.DeserializeAsync<ConversionProfile[]>(fs);
+                        profiles = await JsonSerializer.DeserializeAsync<ConversionProfile[]>(fs, new JsonSerializerOptions{ReadCommentHandling = JsonCommentHandling.Skip});
                     }
                 }
                 catch (Exception e)
@@ -82,20 +57,69 @@ namespace SvgToPng
                     return;
                 }
 
-                if (inputDir != null)
+                foreach (var conversionProfile in profiles)
                 {
-                    var files = inputDir.GetFiles("*.svg");
-                    await Task.WhenAll(files.Select(x => ProcessInputFile(x, profiles)));
+                    await ProcessProfile(conversionProfile, parameters);
                 }
-                else
-                {
-                    await ProcessInputFile(inputFile, profiles);
-                }
+                
             });
             await rootCommand.InvokeAsync(args);
         }
 
-        private static async Task ProcessInputFile(FileInfo inputFile, ConversionProfile[] profiles)
+        private static async Task ProcessProfile(ConversionProfile profile, Params parameters)
+        {
+            var path = parameters.ProfileConfig.DirectoryName;
+            if (profile.Input != null)
+            {
+                for (var i = 0; i < profile.Input.Length; i++)
+                {
+                    if (!Path.IsPathRooted(profile.Input[i]))
+                        profile.Input[i] = Path.Combine(path, profile.Input[i]);
+                }
+            }
+            var inputs = (profile.Input ?? new string[0]).Concat(new[] {parameters.InputFile}).ToArray();
+            var output = profile.OutputDirectory != null
+                ? new DirectoryInfo(Path.IsPathRooted(profile.OutputDirectory)
+                    ? profile.OutputDirectory
+                    : Path.Combine(path, profile.OutputDirectory))
+                : parameters.OutputDirectory;
+            if (!output.Exists)
+            {
+                Directory.CreateDirectory(output.FullName);
+            }
+
+            await Task.WhenAll(inputs.Select(x => ProcessInput(profile, x, output)));
+        }
+
+        private static async Task ProcessInput(ConversionProfile profile, string input, DirectoryInfo outputDir)
+        {
+            DirectoryInfo inputDir = null;
+            FileInfo inputFile = null;
+            if (Directory.Exists(input))
+            {
+                inputDir = new DirectoryInfo(input);
+            }
+            else if (File.Exists(input))
+            {
+                inputFile = new FileInfo(input);
+            }
+            else
+            {
+                Console.WriteLine("[ERROR]: Input path not found: {0}", input);
+                return;
+            }
+            if (inputDir != null)
+            {
+                var files = inputDir.GetFiles("*.svg");
+                await Task.WhenAll(files.Select(x => ProcessInputFile(x, profile, outputDir)));
+            }
+            else
+            {
+                await ProcessInputFile(inputFile, profile, outputDir);
+            }
+        }
+
+        private static async Task ProcessInputFile(FileInfo inputFile, ConversionProfile profile, DirectoryInfo outputDir)
         {
             var svgContent = await inputFile.OpenText().ReadToEndAsync();
             try
@@ -112,26 +136,23 @@ namespace SvgToPng
             }
 
             var inputFileName = Path.GetFileNameWithoutExtension(inputFile.Name);
-            foreach (var profile in profiles)
+            try
             {
-                try
-                {
-                    await ProcessProfile(profile, svgContent, inputFileName);
-                }
-                catch (InvalidXPathException e)
-                {
-                    Console.WriteLine("[ERROR]: Invalid XPath: {0}", e.XPath);
-                    return;
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("[ERROR]: An error occurred: {0}", e);
-                    return;
-                }
+                await ProcessFile(profile, svgContent, inputFileName, outputDir);
+            }
+            catch (InvalidXPathException e)
+            {
+                Console.WriteLine("[ERROR]: Invalid XPath: {0}", e.XPath);
+                return;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[ERROR]: An error occurred: {0}", e);
+                return;
             }
         }
 
-        private static async Task ProcessProfile(ConversionProfile profile, string svgContent, string inputFileName)
+        private static async Task ProcessFile(ConversionProfile profile, string svgContent, string inputFileName, DirectoryInfo outputDir)
         {
             var svg = new XmlDocument();
             svg.LoadXml(svgContent);
@@ -141,11 +162,19 @@ namespace SvgToPng
             }
 
             svgContent = await ToString(svg);
-            await Task.WhenAll(profile.Output.Select(x => ProcessOutput(x, svgContent, inputFileName)));
+            await Task.WhenAll(profile.Output.Select(x => ProcessOutput(x, profile.Overwrite, svgContent, inputFileName, outputDir)));
         }
 
-        private static async Task ProcessOutput(Output output, string svgContent, string inputFileName)
+        private static async Task ProcessOutput(Output output, bool overwrite, string svgContent, string inputFileName, DirectoryInfo outputDir)
         {
+            var fileName = output.Path.Replace("{name}", inputFileName);
+            fileName = Path.Combine(outputDir.FullName, fileName);
+            if (!overwrite && File.Exists(fileName))
+            {
+                Console.WriteLine($"[INFO]: {fileName} already exists. Skipping.");
+                return;
+            }
+
             var svg = new XmlDocument();
             svg.LoadXml(svgContent);
             if (output.ColorConversions != null && output.ColorConversions.Any())
@@ -163,8 +192,6 @@ namespace SvgToPng
             if (output.Height.HasValue)
                 svgDoc.Height = output.Height.Value;
 
-            var fileName = output.Path.Replace("{name}", inputFileName);
-            fileName = Path.Combine(_params.OutputDirectory.FullName, fileName);
             var dir = Path.GetDirectoryName(fileName);
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);

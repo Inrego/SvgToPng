@@ -3,9 +3,22 @@
     "ColorConversions": [
       {
         "XPath": "svg/path[2]",
-        "Color": "#212121"
+        "Color": "#562c2c"
+      },
+      {
+        "XPath": "svg/path[3]",
+        "Color": "#e27171"
       }
     ],
+    // Path is relative to json file, not current working directory.
+    // Absolute path is also supported.
+    "OutputDirectory": "./processed",
+    "Input": [
+      // Paths are relative to json file, not current working directory.
+      // Absolute path is also supported.
+      "./sample_icon.svg"
+    ],
+    "Overwrite": false, 
     "Output": [
       {
         "Path": "android/drawable-hdpi/{name}.png",
@@ -40,51 +53,75 @@
       {
         "Path": "ios/Assets.x.cassets/{name}.imageset/{name}@3.png",
         "Width": 48,
-        "Height": 48
-      },
-      {
-        "Path": "android/drawable-night-hdpi/{name}-dark.png",
-        "Width": 24,
-        "Height": 24,
-        "ColorConversions": [
+        "Height": 48,
+        "ColorConversions": [ // This single icon will be blue instead of red like the others
           {
             "XPath": "svg/path[2]",
-            "Color": "#FFF"
+            "Color": "#768cdc"
+          },
+          {
+            "XPath": "svg/path[3]",
+            "Color": "#2c3556"
           }
         ]
+      }
+    ]
+  },
+  {
+    "ColorConversions": [
+      {
+        "XPath": "svg/path[2]",
+        "Color": "#e27171"
+      },
+      {
+        "XPath": "svg/path[3]",
+        "Color": "#562c2c"
+      }
+    ],
+    // Path is relative to json file, not current working directory.
+    // Absolute path is also supported.
+    "OutputDirectory": "./processed",
+    "Input": [
+      // Paths are relative to json file, not current working directory.
+      // Absolute path is also supported.
+      "./sample_icon.svg"
+    ],
+    "Overwrite": false,
+    "Output": [
+      {
+        "Path": "android/drawable-night-hdpi/{name}.png",
+        "Width": 24,
+        "Height": 24
       },
       {
         "Path": "android/drawable-night-xhdpi/{name}.png",
         "Width": 32,
-        "Height": 32,
-        "ColorConversions": [
-          {
-            "XPath": "svg/path[2]",
-            "Color": "#FFF"
-          }
-        ]
+        "Height": 32
       },
       {
         "Path": "android/drawable-night-xxhdpi/{name}.png",
         "Width": 48,
-        "Height": 48,
-        "ColorConversions": [
-          {
-            "XPath": "svg/path[2]",
-            "Color": "#FFF"
-          }
-        ]
+        "Height": 48
       },
       {
         "Path": "android/drawable-night-xxxhdpi/{name}.png",
         "Width": 60,
-        "Height": 60,
-        "ColorConversions": [
-          {
-            "XPath": "svg/path[2]",
-            "Color": "#FFF"
-          }
-        ]
+        "Height": 60
+      },
+      {
+        "Path": "ios/Assets.x.cassets/{name}.imageset/{name}-1.png",
+        "Width": 16,
+        "Height": 16
+      },
+      {
+        "Path": "ios/Assets.x.cassets/{name}.imageset/{name}@2-1.png",
+        "Width": 32,
+        "Height": 32
+      },
+      {
+        "Path": "ios/Assets.x.cassets/{name}.imageset/{name}@3-1.png",
+        "Width": 48,
+        "Height": 48
       }
     ]
   }
