@@ -38,3 +38,11 @@ Convert `C:/InputFiles/icon.svg` and save all output files in `C:/OutputFiles/`
 ```
 ./SvgToPng -f C:/InputFiles/icon.svg -c C:/InputFiles/sampleprofile.json -o C:/OutputFiles/
 ```
+
+### Publishing
+```
+dotnet publish -c Release -r win-x64 --no-self-contained
+dotnet publish -c Release -r win-x86 --no-self-contained
+dotnet publish -c Release -r osx-x64 --no-self-contained
+dotnet publish -c Release -r linux-x64 --no-self-contained
+```
